@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/16 13:44:39 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/16 14:23:28 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/16 20:26:54 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,9 +79,4 @@ std::string ConfigFile::readFile(std::string path)
 std::string ConfigFile::getPath()
 {
 	return (this->_path);
-}
-
-int ConfigFile::getSize()
-{
-	return (this->_size);
 }

@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 22:51:47 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/15 23:13:46 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/16 21:02:50 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,17 +20,18 @@ class Location;
 class ServerConfig
 {
 	private:
-		uint16_t						_port;
-		in_addr_t						_host;
-		std::string						_server_name;
-		std::string						_root;
-		unsigned long					_client_max_body_size;
-		std::string						_index;
-		bool							_autoindex;
-		std::map<short, std::string>	_error_pages;
-		std::vector<Location> 			_locations;
-		struct sockaddr_in 				_server_address;
-		int								_listen_fd;
+		uint16_t						_port; //port number the server listens to
+		in_addr_t						_host; //IP address of server's host in IPv4
+		std::string						_server_name; //domain name
+		std::string						_root; //Root directory of the server
+		unsigned long					_client_max_body_size; // max size for http request body
+		std::string						_index; //index page
+		bool							_autoindex; //if true, will display directory listing, else will display error page
+		std::map<short, std::string>	_error_pages; //map status codes to custom error pages
+		std::vector<Location> 			_locations; //List of Location objects
+		struct sockaddr_in 				_server_address; //struct that contains serer's IP address and port
+		//Includes: sin_family(AF_INET), sin_port, sin_addr
+		int								_listen_fd; //fd for server's listening socket
 
 	public:
 		ServerConfig();

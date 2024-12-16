@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/16 13:40:38 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/16 13:48:20 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/16 20:26:45 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ class ConfigFile
 		static int fileExistReadable(std::string const path, std::string const index);
 
 		std::string getPath();
-		int getSize();
 };
 
 #endif

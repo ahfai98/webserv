@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ServerConfig.cpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/16 20:24:55 by jyap              #+#    #+#             */
+/*   Updated: 2024/12/16 22:20:28 by jyap             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../inc/ServerConfig.hpp"
 
 ServerConfig::ServerConfig()
@@ -13,27 +25,12 @@ ServerConfig::ServerConfig()
 	this->initErrorPages();
 }
 
-ServerConfig::~ServerConfig() { }
+ServerConfig::~ServerConfig() {}
 
 /* copy constructor */
 ServerConfig::ServerConfig(const ServerConfig &other)
 {
-	if (this != &other)
-	{
-		this->_server_name = other._server_name;
-		this->_root = other._root;
-		this->_host = other._host;
-		this->_port = other._port;
-		this->_client_max_body_size = other._client_max_body_size;
-		this->_index = other._index;
-		this->_error_pages = other._error_pages;
-		this->_locations = other._locations;
-		this->_listen_fd = other._listen_fd;
-		this->_autoindex = other._autoindex;
-		this->_server_address = other._server_address;
-
-	}
-	return ;
+	*this = other;
 }
 
 /* assinment operator */
@@ -89,10 +86,15 @@ void ServerConfig::setHost(std::string parameter)
 	if (parameter == "localhost")
 		parameter = "127.0.0.1";
 	if (!isValidHost(parameter))
-		throw ErrorException("Wrong syntax: host");
-	this->_host = inet_addr(parameter.data());
+		throw ErrorException("Wrong syntax for host: " + parameter);
+	//inet_addr converts IPv4 address in string format into
+	//a 32-bit binary form(network byte order)
+	//127.0.0.1 converts into 0x7f000001
+	// returns INADDR_NONE (-1) if the string is invalid
+	this->_host = inet_addr(parameter.c_str());
 }
 
+//set root for absolute and relative path
 void ServerConfig::setRoot(std::string root)
 {
 	checkToken(root);
@@ -101,45 +103,42 @@ void ServerConfig::setRoot(std::string root)
 		this->_root = root;
 		return ;
 	}
-	char dir[1024];
-	getcwd(dir, 1024);
+	char dir[PATH_MAX];
+	getcwd(dir, PATH_MAX);
 	std::string full_root = dir + root;
 	if (ConfigFile::getTypePath(full_root) != 2)
-		throw ErrorException("Wrong syntax: root");
+		throw ErrorException("Wrong syntax for root: " + root);
 	this->_root = full_root;
 }
 
+//set port
 void ServerConfig::setPort(std::string parameter)
 {
-	unsigned int port;
-	
-	port = 0;
+	unsigned int port = 0;
 	checkToken(parameter);
 	for (size_t i = 0; i < parameter.length(); i++)
 	{
 		if (!std::isdigit(parameter[i]))
-			throw ErrorException("Wrong syntax: port");
+			throw ErrorException("Wrong syntax for port: " + parameter);
 	}
-	port = ft_stoi((parameter));
+	port = ft_stoi(parameter);
 	if (port < 1 || port > 65636)
-		throw ErrorException("Wrong syntax: port");
-	this->_port = (uint16_t) port;
+		throw ErrorException("Wrong syntax for port: " + parameter);
+	this->_port = (uint16_t)port;
 }
 
 void ServerConfig::setClientMaxBodySize(std::string parameter)
 {
-	unsigned long body_size;
-	
-	body_size = 0;
+	unsigned long body_size = 0;
 	checkToken(parameter);
 	for (size_t i = 0; i < parameter.length(); i++)
 	{
-		if (parameter[i] < '0' || parameter[i] > '9')
-			throw ErrorException("Wrong syntax: client_max_body_size");
+		if (!std::isdigit(parameter[i]))
+			throw ErrorException("Wrong syntax for client_max_body_size: " + parameter);
 	}
-	if (!ft_stoi(parameter))
-		throw ErrorException("Wrong syntax: client_max_body_size");
 	body_size = ft_stoi(parameter);
+	if (!body_size)
+		throw ErrorException("Wrong syntax for client_max_body_size: " + parameter);
 	this->_client_max_body_size = body_size;
 }
 
@@ -153,7 +152,7 @@ void ServerConfig::setAutoindex(std::string autoindex)
 {
 	checkToken(autoindex);
 	if (autoindex != "on" && autoindex != "off")
-		throw ErrorException("Wrong syntax: autoindex");
+		throw ErrorException("Wrong syntax for autoindex: " + autoindex);
 	if (autoindex == "on")
 		this->_autoindex = true;
 }
@@ -168,26 +167,50 @@ void ServerConfig::setErrorPages(std::vector<std::string> &parameter)
 		throw ErrorException ("Error page initialization faled");
 	for (size_t i = 0; i < parameter.size() - 1; i++)
 	{
-		for (size_t j = 0; j < parameter[i].size(); j++) {
+		//check error code is all digits
+		for (size_t j = 0; j < parameter[i].size(); j++)
+		{
 			if (!std::isdigit(parameter[i][j]))
 				throw ErrorException("Error code is invalid");
 		}
+		//check error code is 3 digits
 		if (parameter[i].size() != 3)
 			throw ErrorException("Error code is invalid");
 		short code_error = ft_stoi(parameter[i]);
 		if (statusCodeString(code_error)  == "Undefined" || code_error < 400)
 			throw ErrorException ("Incorrect error code: " + parameter[i]);
-		i++;
+		i++; //Move to the next string which is the path to the error page
 		std::string path = parameter[i];
 		checkToken(path);
-		if (ConfigFile::getTypePath(path) != 2)
+		bool rootneeded = false;
+		if (ConfigFile::getTypePath(path) == 2) // If path is a directory
+			throw ErrorException("Error page cannot be a directory: " + path);
+		// First, check if the path exists and is readable
+		if (ConfigFile::getTypePath(path) == 1)  // If it's a file
 		{
-			if (ConfigFile::getTypePath(this->_root + path) != 1)
-				throw ErrorException ("Incorrect path for error page file: " + this->_root + path);
-			if (ConfigFile::checkFile(this->_root + path, 0) == -1 || ConfigFile::checkFile(this->_root + path, 4) == -1)
-				throw ErrorException ("Error page file :" + this->_root + path + " is not accessible");
+			if (ConfigFile::checkFile(path, F_OK) == -1 || ConfigFile::checkFile(path, R_OK) == -1)
+				throw ErrorException("Error page file is not accessible: " + path);
+		}
+		else
+		{
+			// If the first path doesn't exist or isn't accessible, check the root-relative path
+			std::string full_path = this->_root + path;
+			if (ConfigFile::getTypePath(full_path) == 1)  // Check if it's a file
+			{
+				if (ConfigFile::checkFile(full_path, F_OK) == -1 || ConfigFile::checkFile(full_path, R_OK) == -1)
+					throw ErrorException("Error page file is not accessible: " + full_path);
+				rootneeded = true;
+				// If root-relative path is valid and accessible, add it to the map
+			}
+			else
+			{
+				// If neither path nor root-relative path is valid or accessible, throw an exception
+				throw ErrorException("Error page file does not exist or is not accessible: " + path);
+			}
 		}
 		std::map<short, std::string>::iterator it = this->_error_pages.find(code_error);
+		if (rootneeded)
+			path = this->_root + path;
 		if (it != _error_pages.end())
 			this->_error_pages[code_error] = path;
 		else
