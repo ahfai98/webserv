@@ -430,16 +430,16 @@ int ServerConfig::isValidLocation(Location &location) const
 		if (location.getRootLocation().empty()) {
 			location.setRootLocation(this->_root);
 		}
-		if (ConfigFile::isFileExistAndReadable(location.getRootLocation() + location.getPath() + "/", location.getIndexLocation()))
+		if (ConfigFile::fileExistReadable(location.getRootLocation() + location.getPath() + "/", location.getIndexLocation()))
 			return (5);
 		if (!location.getReturn().empty())
 		{
-			if (ConfigFile::isFileExistAndReadable(location.getRootLocation(), location.getReturn()))
+			if (ConfigFile::fileExistReadable(location.getRootLocation(), location.getReturn()))
 				return (3);
 		}
 		if (!location.getAlias().empty())
 		{
-			if (ConfigFile::isFileExistAndReadable(location.getRootLocation(), location.getAlias()))
+			if (ConfigFile::fileExistReadable(location.getRootLocation(), location.getAlias()))
 			 	return (4);
 		}
 	}

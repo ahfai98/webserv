@@ -1,59 +1,78 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ConfigFile.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/16 13:44:39 by jyap              #+#    #+#             */
+/*   Updated: 2024/12/16 14:23:28 by jyap             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../inc/ConfigFile.hpp"
 
-ConfigFile::ConfigFile() : _size(0) { }
+ConfigFile::ConfigFile(): _size(0){}
 
-ConfigFile::ConfigFile(std::string const path) : _path(path), _size(0) { }
+ConfigFile::ConfigFile(std::string const path): _path(path), _size(0){}
 
-ConfigFile::~ConfigFile() { }
+ConfigFile::~ConfigFile(){}
 
-
-/* define is path is file(1), folder(2) or something else(3) */
+// Check path is file, directory or other
 int ConfigFile::getTypePath(std::string const path)
 {
-	struct stat	buffer;
-	int			result;
-	
-	result = stat(path.c_str(), &buffer);
-	if (result == 0)
+	struct stat	file_stat;
+
+	if (stat(path.c_str(), &file_stat) == 0)
 	{
-		if (buffer.st_mode & S_IFREG)
+		if (file_stat.st_mode & S_IFREG) // File
 			return (1);
-		else if (buffer.st_mode & S_IFDIR)
+		else if (file_stat.st_mode & S_IFDIR) // Directory
 			return (2);
-		else
+		else // Other types (symlink, socket, etc.)
 			return (3);
 	}
 	else
-		return (-1);
+	{
+		return (-1); // stat failed
+	}
 }
 
-/* checks is the file exists and accessable */
+// Check file is accessible with the mode (F_OK, R_OK, W_OK, X_OK)
+//Mode: File exist, read, write, execute permissions
+//Returns 0 if accessible, else -1
 int	ConfigFile::checkFile(std::string const path, int mode)
 {
 	return (access(path.c_str(), mode));
 }
 
-int ConfigFile::isFileExistAndReadable(std::string const path, std::string const index)
+//Check file exist and readable for two locations(index or path+index)
+int ConfigFile::fileExistReadable(std::string const path, std::string const index)
 {
-	if (getTypePath(index) == 1 && checkFile(index, 4) == 0)
+	if (getTypePath(index) == 1 && checkFile(index, R_OK) == 0)
 		return (0);
-	if (getTypePath(path + index) == 1 && checkFile(path + index, 4) == 0)
+	if (getTypePath(path + index) == 1 && checkFile(path + index, R_OK) == 0)
 		return (0);
 	return (-1);
 }
 
-/* reading from file to string */
-std::string	ConfigFile::readFile(std::string path)
+//Read file contents into string
+std::string ConfigFile::readFile(std::string path)
 {
-	if (path.empty() || path.length() == 0)
+	if (path.empty())
 		return (NULL);
+	// Open the file in read mode
 	std::ifstream config_file(path.c_str());
-	if (!config_file || !config_file.is_open())
+	if (!config_file.is_open()) 
 		return (NULL);
-
-	std::stringstream stream_binding;
-	stream_binding << config_file.rdbuf();
-	return (stream_binding.str());
+	// Read the file into a string
+	std::string content;
+	char buffer[1024];  // Buffer for reading
+	//Append read content
+	//gcount is the number of characters read from the stream
+	while (config_file.read(buffer, sizeof(buffer)))
+		content.append(buffer, config_file.gcount());
+	return (content);
 }
 
 /* Get functions */

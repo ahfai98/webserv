@@ -303,7 +303,7 @@ void ConfigParser::createServer(std::string &config, ServerConfig &server)
 		server.setHost("localhost;");
 	if (server.getIndex().empty())
 		server.setIndex("index.html;");
-	if (ConfigFile::isFileExistAndReadable(server.getRoot(), server.getIndex()))
+	if (ConfigFile::fileExistReadable(server.getRoot(), server.getIndex()))
 		throw ErrorException("Index from config file not found or unreadable");
 	if (server.checkLocaitons())
 		throw ErrorException("Locaition is duplicated");
