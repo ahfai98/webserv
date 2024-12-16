@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/16 20:24:55 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/16 22:20:28 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/16 22:52:39 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,8 +157,6 @@ void ServerConfig::setAutoindex(std::string autoindex)
 		this->_autoindex = true;
 }
 
-/* checks if there is such a default error code. If there is, it overwrites the path to the file,
-otherwise it creates a new pair: error code - path to the file */
 void ServerConfig::setErrorPages(std::vector<std::string> &parameter)
 {
 	if (parameter.empty())
@@ -168,8 +166,7 @@ void ServerConfig::setErrorPages(std::vector<std::string> &parameter)
 	for (size_t i = 0; i < parameter.size() - 1; i++)
 	{
 		//check error code is all digits
-		for (size_t j = 0; j < parameter[i].size(); j++)
-		{
+		for (size_t j = 0; j < parameter[i].size(); j++) {
 			if (!std::isdigit(parameter[i][j]))
 				throw ErrorException("Error code is invalid");
 		}
@@ -182,41 +179,31 @@ void ServerConfig::setErrorPages(std::vector<std::string> &parameter)
 		i++; //Move to the next string which is the path to the error page
 		std::string path = parameter[i];
 		checkToken(path);
-		bool rootneeded = false;
-		if (ConfigFile::getTypePath(path) == 2) // If path is a directory
-			throw ErrorException("Error page cannot be a directory: " + path);
-		// First, check if the path exists and is readable
-		if (ConfigFile::getTypePath(path) == 1)  // If it's a file
-		{
-			if (ConfigFile::checkFile(path, F_OK) == -1 || ConfigFile::checkFile(path, R_OK) == -1)
-				throw ErrorException("Error page file is not accessible: " + path);
-		}
-		else
-		{
-			// If the first path doesn't exist or isn't accessible, check the root-relative path
-			std::string full_path = this->_root + path;
-			if (ConfigFile::getTypePath(full_path) == 1)  // Check if it's a file
-			{
-				if (ConfigFile::checkFile(full_path, F_OK) == -1 || ConfigFile::checkFile(full_path, R_OK) == -1)
-					throw ErrorException("Error page file is not accessible: " + full_path);
-				rootneeded = true;
-				// If root-relative path is valid and accessible, add it to the map
-			}
-			else
-			{
-				// If neither path nor root-relative path is valid or accessible, throw an exception
-				throw ErrorException("Error page file does not exist or is not accessible: " + path);
-			}
-		}
+		if (ConfigFile::getTypePath(path) == 2) //If path is directory
+			throw ErrorException ("Incorrect path for error page file: " + path);
+		if (ConfigFile::getTypePath(this->_root + path) != 1) //If path is not file
+			throw ErrorException ("Incorrect path for error page file: " + this->_root + path);
+		// If path does not exist or is not accessible
+		if (ConfigFile::checkFile(this->_root + path, F_OK) == -1 || ConfigFile::checkFile(this->_root + path, R_OK) == -1)
+			throw ErrorException ("Error page file :" + this->_root + path + " is not accessible");
 		std::map<short, std::string>::iterator it = this->_error_pages.find(code_error);
-		if (rootneeded)
-			path = this->_root + path;
+		//If error code mapping is found, overwrite, else add new map entry
 		if (it != _error_pages.end())
 			this->_error_pages[code_error] = path;
 		else
 			this->_error_pages.insert(std::make_pair(code_error, path));
 	}
 }
+
+/*
+if (ConfigFile::getTypePath(path) != 2)
+		{
+			if (ConfigFile::getTypePath(this->_root + path) != 1)
+				throw ErrorException ("Incorrect path for error page file: " + this->_root + path);
+			if (ConfigFile::checkFile(this->_root + path, 0) == -1 || ConfigFile::checkFile(this->_root + path, 4) == -1)
+				throw ErrorException ("Error page file :" + this->_root + path + " is not accessible");
+		}
+*/
 
 /* parsing and set locations */
 void ServerConfig::setLocation(std::string path, std::vector<std::string> parameter)

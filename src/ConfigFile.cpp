@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/16 13:44:39 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/16 20:26:54 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/16 22:34:17 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,13 +66,9 @@ std::string ConfigFile::readFile(std::string path)
 	if (!config_file.is_open()) 
 		return (NULL);
 	// Read the file into a string
-	std::string content;
-	char buffer[1024];  // Buffer for reading
-	//Append read content
-	//gcount is the number of characters read from the stream
-	while (config_file.read(buffer, sizeof(buffer)))
-		content.append(buffer, config_file.gcount());
-	return (content);
+	std::stringstream ss;
+	ss << config_file.rdbuf();
+	return (ss.str());
 }
 
 /* Get functions */
