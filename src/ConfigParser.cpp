@@ -64,7 +64,7 @@ int ConfigParser::createCluster(const std::string &config_file)
 
 	if (file.getTypePath(file.getPath()) != 1)
 		throw ErrorException("File is invalid");
-	if (file.checkFile(file.getPath(), 4) == -1)
+	if (file.checkFile(file.getPath(), R_OK) == -1)
 		throw ErrorException("File is not accessible");
 	content = file.readFile(config_file);
 	if (content.empty())
@@ -305,8 +305,8 @@ void ConfigParser::createServer(std::string &config, ServerConfig &server)
 		server.setIndex("index.html;");
 	if (ConfigFile::fileExistReadable(server.getRoot(), server.getIndex()))
 		throw ErrorException("Index from config file not found or unreadable");
-	if (server.checkLocaitons())
-		throw ErrorException("Locaition is duplicated");
+	if (server.checkLocationsDup())
+		throw ErrorException("Location is duplicated");
 	if (!server.getPort())
 		throw ErrorException("Port not found");
 	server.setErrorPages(error_codes);

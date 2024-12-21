@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/16 20:24:55 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/16 22:52:39 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/21 17:55:38 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,16 +195,6 @@ void ServerConfig::setErrorPages(std::vector<std::string> &parameter)
 	}
 }
 
-/*
-if (ConfigFile::getTypePath(path) != 2)
-		{
-			if (ConfigFile::getTypePath(this->_root + path) != 1)
-				throw ErrorException ("Incorrect path for error page file: " + this->_root + path);
-			if (ConfigFile::checkFile(this->_root + path, 0) == -1 || ConfigFile::checkFile(this->_root + path, 4) == -1)
-				throw ErrorException ("Error page file :" + this->_root + path + " is not accessible");
-		}
-*/
-
 /* parsing and set locations */
 void ServerConfig::setLocation(std::string path, std::vector<std::string> parameter)
 {
@@ -220,17 +210,17 @@ void ServerConfig::setLocation(std::string path, std::vector<std::string> parame
 	{
 		if (parameter[i] == "root" && (i + 1) < parameter.size())
 		{
-			if (!new_location.getRootLocation().empty())
+			if (!new_location.getRootLocation().empty()) //check if root is already set
 				throw ErrorException("Root of location is duplicated");
 			checkToken(parameter[++i]);
-			if (ConfigFile::getTypePath(parameter[i]) == 2)
+			if (ConfigFile::getTypePath(parameter[i]) == 2) //if directory
 				new_location.setRootLocation(parameter[i]);
 			else
-				new_location.setRootLocation(this->_root + parameter[i]);
+				new_location.setRootLocation(this->_root + parameter[i]); //if not directory
 		}
 		else if ((parameter[i] == "allow_methods" || parameter[i] == "methods") && (i + 1) < parameter.size())
 		{
-			if (flag_methods)
+			if (flag_methods) //check if methods already set
 				throw ErrorException("Allow_methods of location is duplicated");
 			std::vector<std::string> methods;
 			while (++i < parameter.size())
@@ -255,7 +245,7 @@ void ServerConfig::setLocation(std::string path, std::vector<std::string> parame
 		{
 			if (path == "/cgi-bin")
 				throw ErrorException("parameter autoindex not allow for CGI");
-			if (flag_autoindex)
+			if (flag_autoindex) //check if autoindex already set
 				throw ErrorException("Autoindex of location is duplicated");
 			checkToken(parameter[++i]);
 			new_location.setAutoindex(parameter[i]);
@@ -263,7 +253,8 @@ void ServerConfig::setLocation(std::string path, std::vector<std::string> parame
 		}
 		else if (parameter[i] == "index" && (i + 1) < parameter.size())
 		{
-			if (!new_location.getIndexLocation().empty())
+			//check if index already set
+			if (!new_location.getIndexLocation().empty()) 
 				throw ErrorException("Index of location is duplicated");
 			checkToken(parameter[++i]);
 			new_location.setIndexLocation(parameter[i]);
@@ -272,6 +263,7 @@ void ServerConfig::setLocation(std::string path, std::vector<std::string> parame
 		{
 			if (path == "/cgi-bin")
 				throw ErrorException("parameter return not allow for CGI");
+			//check if return already set
 			if (!new_location.getReturn().empty())
 				throw ErrorException("Return of location is duplicated");
 			checkToken(parameter[++i]);
@@ -281,6 +273,7 @@ void ServerConfig::setLocation(std::string path, std::vector<std::string> parame
 		{
 			if (path == "/cgi-bin")
 				throw ErrorException("parameter alias not allow for CGI");
+			//check if alias already set
 			if (!new_location.getAlias().empty())
 				throw ErrorException("Alias of location is duplicated");
 			checkToken(parameter[++i]);
@@ -323,6 +316,7 @@ void ServerConfig::setLocation(std::string path, std::vector<std::string> parame
 					if (i + 1 >= parameter.size())
 						throw ErrorException("Token is invalid");
 				}
+				//check if python or bash is present
 				if (parameter[i].find("/python") == std::string::npos && parameter[i].find("/bash") == std::string::npos)
 					throw ErrorException("cgi_path is invalid");
 			}
@@ -330,28 +324,28 @@ void ServerConfig::setLocation(std::string path, std::vector<std::string> parame
 		}
 		else if (parameter[i] == "client_max_body_size" && (i + 1) < parameter.size())
 		{
-			if (flag_max_size)
+			if (flag_max_size) //check if max body size already set
 				throw ErrorException("Maxbody_size of location is duplicated");
 			checkToken(parameter[++i]);
 			new_location.setMaxBodySize(parameter[i]);
 			flag_max_size = true;
 		}
-		else if (i < parameter.size())
+		else if (i < parameter.size()) //other parameters are not valid
 			throw ErrorException("parameter in a location is invalid");
 	}
 	if (new_location.getPath() != "/cgi-bin" && new_location.getIndexLocation().empty())
-		new_location.setIndexLocation(this->_index);
-	if (!flag_max_size)
+		new_location.setIndexLocation(this->_index); //set index
+	if (!flag_max_size) //set default max body size
 		new_location.setMaxBodySize(this->_client_max_body_size);
 	valid = isValidLocation(new_location);
 	if (valid == 1)
 		throw ErrorException("Failed CGI validation");
 	else if (valid == 2)
-		throw ErrorException("Failed path in locaition validation");
+		throw ErrorException("Failed path in location validation");
 	else if (valid == 3)
-		throw ErrorException("Failed redirection file in locaition validation");
+		throw ErrorException("Failed redirection file in location validation");
 	else if (valid == 4)
-		throw ErrorException("Failed alias file in locaition validation");
+		throw ErrorException("Failed alias file in location validation");
 	this->_locations.push_back(new_location);
 }
 
@@ -360,7 +354,11 @@ void	ServerConfig::setFd(int fd)
 	this->_listen_fd = fd;
 }
 
-/* validation of parameters */
+//inet_pton converts a string representing IPv4 address into binary representation
+//AF_INET means IPv4
+//Stores the binary representation into sockaddr.sin_addr
+//Returns 1 if conversion is successful, 0 if host is not valid IPv4 string
+//Returns -1 if not valid address family (AF_INET for IPv4, AF_INET6 for IPv6)
 bool ServerConfig::isValidHost(std::string host) const
 {
 	struct sockaddr_in sockaddr;
@@ -374,7 +372,7 @@ bool ServerConfig::isValidErrorPages()
 	{
 		if (it->first < 100 || it->first > 599)
 			return (false);
-		if (ConfigFile::checkFile(getRoot() + it->second, 0) < 0 || ConfigFile::checkFile(getRoot() + it->second, 4) < 0)
+		if (ConfigFile::checkFile(getRoot() + it->second, F_OK) < 0 || ConfigFile::checkFile(getRoot() + it->second, R_OK) < 0)
 			return (false);
 	}
 	return (true);
@@ -389,8 +387,9 @@ int ServerConfig::isValidLocation(Location &location) const
 			return (1);
 
 
-		if (ConfigFile::checkFile(location.getIndexLocation(), 4) < 0)
+		if (ConfigFile::checkFile(location.getIndexLocation(), R_OK) < 0)
 		{
+			//use location's root or cwd and combine with path to get Index location
 			std::string path = location.getRootLocation() + location.getPath() + "/" + location.getIndexLocation();
 			if (ConfigFile::getTypePath(path) != 1)
 			{				
@@ -398,9 +397,10 @@ int ServerConfig::isValidLocation(Location &location) const
 				location.setRootLocation(root);
 				path = root + location.getPath() + "/" + location.getIndexLocation();
 			}
-			if (path.empty() || ConfigFile::getTypePath(path) != 1 || ConfigFile::checkFile(path, 4) < 0)
+			if (path.empty() || ConfigFile::getTypePath(path) != 1 || ConfigFile::checkFile(path, R_OK) < 0)
 				return (1);
 		}
+		// check if the number of Cgi paths matches with number of extensions
 		if (location.getCgiPath().size() != location.getCgiExtension().size())
 			return (1);
 		std::vector<std::string>::const_iterator it;
@@ -415,6 +415,7 @@ int ServerConfig::isValidLocation(Location &location) const
 			std::string tmp = *it;
 			if (tmp != ".py" && tmp != ".sh" && tmp != "*.py" && tmp != "*.sh")
 				return (1);
+			//set _ext_path[".py"] == "/usr/bin/python", do same for .sh
 			for (it_path = location.getCgiPath().begin(); it_path != location.getCgiPath().end(); ++it_path)
 			{
 				std::string tmp_path = *it_path;
@@ -435,19 +436,20 @@ int ServerConfig::isValidLocation(Location &location) const
 	}
 	else
 	{
-		if (location.getPath()[0] != '/')
+		if (location.getPath()[0] != '/') //checks for / symbol at the start
 			return (2);
-		if (location.getRootLocation().empty()) {
+		if (location.getRootLocation().empty()) //set default root
+		{
 			location.setRootLocation(this->_root);
 		}
 		if (ConfigFile::fileExistReadable(location.getRootLocation() + location.getPath() + "/", location.getIndexLocation()))
 			return (5);
-		if (!location.getReturn().empty())
+		if (!location.getReturn().empty()) //check return is valid
 		{
 			if (ConfigFile::fileExistReadable(location.getRootLocation(), location.getReturn()))
 				return (3);
 		}
-		if (!location.getAlias().empty())
+		if (!location.getAlias().empty()) //check alias is valid
 		{
 			if (ConfigFile::fileExistReadable(location.getRootLocation(), location.getAlias()))
 			 	return (4);
@@ -538,7 +540,7 @@ void ServerConfig::checkToken(std::string &parameter)
 }
 
 /* check location for a dublicate */
-bool ServerConfig::checkLocaitons() const
+bool ServerConfig::checkLocationsDup() const
 {
 	if (this->_locations.size() < 2)
 		return (false);
@@ -556,21 +558,33 @@ bool ServerConfig::checkLocaitons() const
 /* socket setup and binding */
 void	ServerConfig::setupServer(void)
 {
+	//AF_INET means for IPv4
+	//SOCK_STREAM : Use TCP, 0 for Default protocol for TCP/IP
+	// returns fd for the socket or -1 if fail
 	if ((_listen_fd = socket(AF_INET, SOCK_STREAM, 0) )  == -1 )
-    {
+	{
 		Logger::logMsg(RED, "webserv: socket error %s   Closing ....", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
+		exit(EXIT_FAILURE);
+	}
 
-    int option_value = 1;
-    setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
-    memset(&_server_address, 0, sizeof(_server_address));
-    _server_address.sin_family = AF_INET;
-    _server_address.sin_addr.s_addr = _host;
-    _server_address.sin_port = htons(_port);
-    if (bind(_listen_fd, (struct sockaddr *) &_server_address, sizeof(_server_address)) == -1)
-    {
+	int option_value = 1;
+	// set socket options
+	// SOL_SOCKET applies the option at the socket level
+	// SO_REUSEADDR allows reuse of local addresses
+	// &option_value Enables the option
+	// sizeof(int) size of the option value
+	setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
+	memset(&_server_address, 0, sizeof(_server_address));
+	// sin_family sets the  address family
+	// sin_addr.s_addr stores the server's host address in network byte order
+	// sin_port sets server port(converted to network byte order using htons)
+	_server_address.sin_family = AF_INET;
+	_server_address.sin_addr.s_addr = _host;
+	_server_address.sin_port = htons(_port);
+	// bind the socket to specified IP address and port, returns -1 if fail
+	if (bind(_listen_fd, (struct sockaddr *) &_server_address, sizeof(_server_address)) == -1)
+	{
 		Logger::logMsg(RED, "webserv: bind error %s   Closing ....", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
+		exit(EXIT_FAILURE);
+	}
 }

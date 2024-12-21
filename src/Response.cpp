@@ -210,7 +210,7 @@ int        Response::handleCgi(std::string &location_key)
         _code = 404;
         return (1);
     }
-    if (ConfigFile::checkFile(path, 1) == -1 || ConfigFile::checkFile(path, 3) == -1)
+    if (ConfigFile::checkFile(path, X_OK) == -1 || ConfigFile::checkFile(path, 3) == -1)
     {
         _code = 403;
         return (1);

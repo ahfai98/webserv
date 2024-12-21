@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 22:51:47 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/16 21:02:50 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/21 17:49:05 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ class ServerConfig
 		const std::string &getPathErrorPage(short key);
 		const std::vector<Location>::iterator getLocationKey(std::string key);
 		static void checkToken(std::string &parameter);
-		bool checkLocaitons() const;
+		bool checkLocationsDup() const;
 
 		class ErrorException : public std::exception
 		{
