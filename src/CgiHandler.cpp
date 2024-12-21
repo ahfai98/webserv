@@ -60,20 +60,10 @@ CgiHandler &CgiHandler::operator=(const CgiHandler &rhs)
 }
 
 /*Set functions */
-void CgiHandler::setCgiPid(pid_t cgi_pid)
-{
-    this->_cgi_pid = cgi_pid;
-}
 
 void CgiHandler::setCgiPath(const std::string &cgi_path)
 {
 	this->_cgi_path = cgi_path;
-}
-
-/* Get functions */
-const std::map<std::string, std::string> &CgiHandler::getEnv() const
-{
-    return (this->_env);
 }
 
 const pid_t &CgiHandler::getCgiPid() const

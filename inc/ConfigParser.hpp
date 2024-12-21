@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/15 22:47:57 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/15 22:49:12 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/21 22:11:15 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ class ConfigParser
 		void createServer(std::string &config, ServerConfig &server);
 		void checkServers();
 		std::vector<ServerConfig>	getServers();
-		int	stringCompare(std::string str1, std::string str2, size_t pos);
 		int print();
 		
 		class ErrorException : public std::exception

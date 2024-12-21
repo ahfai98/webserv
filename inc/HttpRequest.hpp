@@ -67,7 +67,6 @@ class HttpRequest
         HttpMethod                                  &getMethod();
         std::string                                 &getPath();
         std::string                                 &getQuery();
-        std::string                                 &getFragment();
         std::string                                 getHeader(std::string const &);
 		const std::map<std::string, std::string>    &getHeaders() const;
 		std::string                                 getMethodStr();
@@ -76,18 +75,15 @@ class HttpRequest
         std::string                                 &getBoundary();
         bool                                        getMultiformFlag();
         
-        void        setMethod(HttpMethod &);
         void        setHeader(std::string &, std::string &);
         void        setMaxBodySize(size_t);
         void        setBody(std::string name);
 
         void        feed(char *data, size_t size);
         bool        parsingCompleted();
-        void        printMessage();
         void        clear();
         short       errorCode();
         bool        keepAlive();
-        void        cutReqBody(int bytes);
 
     private:
         std::string                         _path;

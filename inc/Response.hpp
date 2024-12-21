@@ -18,7 +18,6 @@ class Response
         ~Response();
 
         std::string     getRes();
-        size_t      getLen() const;
         int         getCode() const;
 
         void        setRequest(HttpRequest &);
@@ -53,7 +52,6 @@ class Response
         bool            _auto_index;
 
         int     buildBody();
-        size_t  file_size();
         void    setStatusLine();
         void    setHeaders();
         void    setServerDefaultErrorPages();

@@ -657,11 +657,6 @@ std::string &HttpRequest::getQuery()
     return (_query);
 }
 
-std::string &HttpRequest::getFragment()
-{
-    return (_fragment);
-}
-
 std::string HttpRequest::getHeader(std::string const &name)
 {
     return (_request_headers[name]);
@@ -704,11 +699,6 @@ void    HttpRequest::setBody(std::string body)
     _body_str = body;
 }
 
-void    HttpRequest::setMethod(HttpMethod & method)
-{
-    _method = method;
-}
-
 void    HttpRequest::setHeader(std::string &name, std::string &value)
 {
     trimStr(value);
@@ -720,28 +710,6 @@ void    HttpRequest::setMaxBodySize(size_t size)
 {
     _max_body_size = size;
 }
-
-
-void        HttpRequest::printMessage()
-{
-    std::cout << _method_str[_method] + " " + _path + "?" + _query + "#" + _fragment
-              + " " + "HTTP/" << _ver_major  << "." << _ver_minor << std::endl;
-
-    for (std::map<std::string, std::string>::iterator it = _request_headers.begin();
-    it != _request_headers.end(); ++it)
-    {
-        std::cout << it->first + ":" + it->second << std::endl;
-    }
-    for (std::vector<u_int8_t>::iterator it = _body.begin(); it != _body.end(); ++it)
-    {
-        std::cout << *it;
-    }
-    std::cout << std::endl << "END OF BODY" << std::endl;
-
-    std::cout << "BODY FLAG =" << _body_flag << "  _BOD_done_flag= " << _body_done_flag << "FEIDLS FLAG = " << _fields_done_flag
-    << std::endl;
-}
-
 
 void        HttpRequest::_handle_headers()
 {
@@ -816,9 +784,4 @@ bool        HttpRequest::keepAlive()
             return (false);
     }
     return (true);
-}
-
-void            HttpRequest::cutReqBody(int bytes)
-{
-    _body_str = _body_str.substr(bytes);
 }

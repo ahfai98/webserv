@@ -449,12 +449,6 @@ std::string Response::getRes()
     return (_response_content);
 }
 
-/* Returns the length of entire reponse ( Headers + Body) */
-size_t Response::getLen() const
-{
-	return (_response_content.length());
-}
-
 /* Constructs Status line based on status code. */
 void        Response::setStatusLine()
 {

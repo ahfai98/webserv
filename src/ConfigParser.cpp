@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ConfigParser.cpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/21 18:12:30 by jyap              #+#    #+#             */
+/*   Updated: 2024/12/21 22:11:20 by jyap             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../inc/ConfigParser.hpp"
 
 ConfigParser::ConfigParser()
@@ -5,7 +17,7 @@ ConfigParser::ConfigParser()
 	this->_nb_server = 0;
 }
 
-ConfigParser::~ConfigParser() { }
+ConfigParser::~ConfigParser() {}
 
 /* printing parameters of servers from config file */
 int ConfigParser::print()
@@ -73,7 +85,7 @@ int ConfigParser::createCluster(const std::string &config_file)
 	removeWhiteSpace(content);
 	splitServers(content);
 	if (this->_server_config.size() != this->_nb_server)
-		throw ErrorException("Somthing with size"); //rewrite the sentence
+		throw ErrorException("Something with size");
 	for (size_t i = 0; i < this->_nb_server; i++)
 	{
 		ServerConfig server;
@@ -121,7 +133,7 @@ void ConfigParser::splitServers(std::string &content)
 	size_t end = 1;
 
 	if (content.find("server", 0) == std::string::npos)
-		throw ErrorException("Server did not find");
+		throw ErrorException("No server block found");
 	while (start != end && start < content.length())
 	{
 		start = findStartServer(start, content);
@@ -312,22 +324,6 @@ void ConfigParser::createServer(std::string &config, ServerConfig &server)
 	server.setErrorPages(error_codes);
 	if (!server.isValidErrorPages())
 		throw ErrorException("Incorrect path for error page or number of error");
-}
-
-/* comparing strings from position */
-int	ConfigParser::stringCompare(std::string str1, std::string str2, size_t pos)
-{
-	size_t	i;
-
-	i = 0;
-	while (pos < str1.length() && i < str2.length() && str1[pos] == str2[i])
-	{
-		pos++;
-		i++;
-	}
-	if (i == str2.length() && pos <= str1.length() && (str1.length() == pos || isspace(str1[pos])))
-		return (0);
-	return (1);
 }
 
 /* checking repeat and mandatory parameters*/

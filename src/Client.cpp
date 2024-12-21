@@ -50,31 +50,12 @@ void    Client::setSocket(int &sock)
     _client_socket = sock;
 }
 
-void    Client::setAddress(sockaddr_in &addr)
-{
-    _client_address =  addr;
-}
 
 void    Client::setServer(ServerConfig &server)
 {
     response.setServer(server);
 }
 
-
-const int     &Client::getSocket() const
-{
-    return (_client_socket);
-}
-
-const HttpRequest   &Client::getRequest() const
-{
-    return (request);
-}
-
-const struct sockaddr_in    &Client::getAddress() const
-{
-    return (_client_address);
-}
 
 const time_t     &Client::getLastTime() const
 {
