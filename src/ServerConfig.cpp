@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/16 20:24:55 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/21 18:10:35 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/21 22:38:39 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -540,7 +540,7 @@ void ServerConfig::checkToken(std::string &parameter)
 	parameter.erase(pos);
 }
 
-/* check location for a dublicate */
+/* check location for a duplicate*/
 bool ServerConfig::checkLocationsDup() const
 {
 	if (this->_locations.size() < 2)
