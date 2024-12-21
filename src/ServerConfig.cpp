@@ -6,7 +6,7 @@
 /*   By: jyap <jyap@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/16 20:24:55 by jyap              #+#    #+#             */
-/*   Updated: 2024/12/21 17:55:38 by jyap             ###   ########.fr       */
+/*   Updated: 2024/12/21 18:10:35 by jyap             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -431,6 +431,7 @@ int ServerConfig::isValidLocation(Location &location) const
 				}
 			}
 		}
+		// check number of cgi path and the number of cgiext-path map entries are the same
 		if (location.getCgiPath().size() != location.getExtensionPath().size())
 			return (1);
 	}
